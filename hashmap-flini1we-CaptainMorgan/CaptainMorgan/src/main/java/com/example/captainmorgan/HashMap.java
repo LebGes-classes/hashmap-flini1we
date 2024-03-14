@@ -2,6 +2,7 @@ package com.example.captainmorgan;
 
 class HashMap<K,V> implements HashMapActions<K,V> {
     private Node<K, V>[] bucket;
+    Node<K, V>[] newBucket;
     private int size;
     private final float loadFactor = 0.75F;
 
@@ -12,6 +13,11 @@ class HashMap<K,V> implements HashMapActions<K,V> {
 
     public void put(K key, V value){
         int hash = key.hashCode();
+
+        if (hash == 0) {
+            throw new IllegalArgumentException("Key must have a non-zero hash code.");
+        }
+
         int bucketIndex = hash % bucket.length;
 
         Node<K, V> current = bucket[bucketIndex];
@@ -31,12 +37,11 @@ class HashMap<K,V> implements HashMapActions<K,V> {
         size++;
 
         if(size > loadFactor * bucket.length){
-            resize();
+            resize(bucket.length * 2);
         }
     }
-    private void resize(){
-        int newSize = bucket.length * 2;
-        Node<K, V>[] newBucket = new Node[newSize];
+    private void resize(int newSize){
+        newBucket = new Node[newSize];
         for(Node<K, V> node : bucket){
             while (node != null) {
                 int newIndex = node.getHash() % newSize;
@@ -49,6 +54,7 @@ class HashMap<K,V> implements HashMapActions<K,V> {
 
     public V get(K key){
         int hash = key.hashCode();
+
         int bucketIndex = hash % bucket.length;
 
         Node<K, V> current = bucket[bucketIndex];
@@ -63,6 +69,8 @@ class HashMap<K,V> implements HashMapActions<K,V> {
 
     public boolean contains(K key){
         int hash = key.hashCode();
+
+
         int bucketIndex = hash % bucket.length;
 
         Node<K , V> current = bucket[bucketIndex];
@@ -77,6 +85,8 @@ class HashMap<K,V> implements HashMapActions<K,V> {
 
     public boolean containsValue(V value){
         int hash = value.hashCode();
+
+
         int bucketIndex = hash % bucket.length;
 
         Node<K ,V> current = bucket[bucketIndex];
@@ -92,6 +102,7 @@ class HashMap<K,V> implements HashMapActions<K,V> {
 
     public V remove(K key) {
         int hash = key.hashCode();
+
         int indexTable = hash % size;
 
         Node<K, V> current = bucket[indexTable];
@@ -105,6 +116,11 @@ class HashMap<K,V> implements HashMapActions<K,V> {
                     prev.setNext(current.getNext());
                 }
                 size--;
+
+                if(size < loadFactor * bucket.length){
+                    resize((int)(bucket.length / 1.5));
+                }
+                
                 return current.getValue();
             }
 
