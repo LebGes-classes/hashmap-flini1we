@@ -84,18 +84,16 @@ class HashMap<K,V> implements HashMapActions<K,V> {
     }
 
     public boolean containsValue(V value){
-        int hash = value.hashCode();
+        Node<K,V>[] current = this.bucket;
 
-
-        int bucketIndex = hash % bucket.length;
-
-        Node<K ,V> current = bucket[bucketIndex];
-
-        while (current != null){
-            if(current.getValue().equals(value)){
-                return true;
+        for(Node<K,V> node : current){
+            while (node != null){
+                if(node.getValue().equals(value) ||
+                        node.getValue() == value){
+                    return true;
+                }
+                node = node.getNext();
             }
-            current = current.getNext();
         }
         return false;
     }
@@ -120,7 +118,7 @@ class HashMap<K,V> implements HashMapActions<K,V> {
                 if(size < loadFactor * bucket.length){
                     resize((int)(bucket.length / 1.5));
                 }
-                
+
                 return current.getValue();
             }
 
@@ -135,14 +133,14 @@ class HashMap<K,V> implements HashMapActions<K,V> {
     }
 
     public void clear() {
-        bucket = null;
+        bucket = new Node[4];
+        size = 0;
     }
 
 
-    @Override
-    public String toString() {
+    public void MaptoString() {
         StringBuilder sb = new StringBuilder("{");
-        for(Node<K,V> node : bucket){
+        for (Node<K, V> node : bucket) {
             while (node != null) {
                 sb.append(node.getKey()).append("=").append(node.getValue());
                 if (node.getNext() != null) {
@@ -151,7 +149,9 @@ class HashMap<K,V> implements HashMapActions<K,V> {
                 node = node.getNext();
             }
         }
-        sb.append("}");
-        return sb.toString();
+        if (sb.length() > 1) {
+            sb.delete(sb.length() - 2, sb.length());
+        }
+        System.out.println(sb.append("}"));
     }
 }
